@@ -102,9 +102,9 @@
     <p class="lead">Cảm ơn cậu đã dành thời gian chọn cùng tớ. Tớ rất mong chờ buổi hẹn hôm đó.</p>
     <div class="summary" id="summary"></div>
     <div class="center">
-      <button class="btn" id="copy">Sao chép lựa chọn 📋</button>
+      <button class="btn" id="copy">Xong rồi 💌</button>
     </div>
-    <p class="note" id="note">Cậu bấm sao chép rồi dán gửi lại cho tớ nha 🥰</p>
+    <p class="note" id="note">Bấm &quot;Xong rồi&quot; để tớ nhận được lựa chọn của cậu nha 🥰</p>
   </section>
 
 </div>
@@ -121,7 +121,7 @@ const movies=[
  {n:"Ebenezer",d:"Phim ma Giáng sinh, giả tưởng. Hơi rợn rợn, nhưng có tớ ngồi cạnh cậu rồi 👻",e:"🕯️",g:"g5",img:"img/ebenezer.jpg"}
 ];
 const FORM_KEY="b56226ed-670b-4e71-a7c2-4d72c42315c9"; // dán mã Web3Forms vào đây
-let sent=false;
+let sent=false, ok=false;
 const state={food:null,late:null,movie:null};
 const $=id=>document.getElementById(id);
 
@@ -167,7 +167,7 @@ async function sendResult(){
       body:JSON.stringify({access_key:FORM_KEY,subject:'Tâm đã chọn plan first date 💌',from_name:'Plan first date',
         'Quán ăn':state.food,'Về muộn':state.late?'Được':'Không, về sớm','Phim':state.late?(state.movie||'Chưa chọn'):'-'})});
     const j=await r.json();
-    if(j.success){$('note').textContent='Tớ nhận được rồi nha, cảm ơn cậu 🥰';return}
+    if(j.success){ok=true;$('note').textContent='Tớ nhận được rồi nha, cảm ơn cậu 🥰';return}
     throw new Error('fail');
   }catch(e){sent=false}
 }
@@ -179,14 +179,16 @@ function buildSummary(){
   sendResult();
 }
 $('copy').onclick=async()=>{
+  if(!ok)await sendResult();
+  if(ok){$('note').textContent='Tớ nhận được rồi nha, cảm ơn cậu 🥰';return}
   const text=$('summary').textContent;
   try{
     await navigator.clipboard.writeText(text);
-    $('note').textContent="Đã sao chép! Dán gửi cho tớ nha 💕";
+    $('note').textContent='Chưa gửi được rồi 🥲 Tớ đã chép lựa chọn của cậu, cậu dán gửi cho tớ giúp nha 💕';
   }catch(e){
     const r=document.createRange();r.selectNodeContents($('summary'));
-    const s=getSelection();s.removeAllRanges();s.addRange(r);
-    $('note').textContent="Cậu giữ và sao chép đoạn trên giúp tớ nha 💕";
+    const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+    $('note').textContent='Chưa gửi được rồi 🥲 Cậu giữ và sao chép đoạn trên gửi cho tớ giúp nha 💕';
   }
 };
 </script>
