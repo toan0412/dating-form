@@ -249,7 +249,7 @@ async function send(){
   busy=true;$('retry').hidden=true;setStatus('Đang gửi cho tớ…');
   try{
     const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
-      body:JSON.stringify({access_key:FORM_KEY,subject:'Tâm đã chọn plan first date 💌',from_name:'Plan first date',
+      body:JSON.stringify({access_key:FORM_KEY,subject:'Tâm đã chọn plan first date 💌 ('+new Date().toLocaleTimeString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'})+')',from_name:'Plan first date','Thời gian':new Date().toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'}),'Mã gửi':Math.random().toString(36).slice(2,8),
         'Quán ăn':state.food,'Về muộn':state.late?'Được':'Không, về sớm','Phim':state.late?(state.movie||'Chưa chọn'):'-'})});
     const j=await r.json();
     if(!j.success)throw new Error('fail');
