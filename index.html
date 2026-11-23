@@ -120,7 +120,7 @@ const movies=[
  {n:"Đấu Trường Sinh Tử: Bình Minh Ngày Chiêu Quân",d:"Hành động, phiêu lưu, kỳ ảo. Cuộc chiến sinh tồn nghẹt thở ⚔️",e:"⚔️",g:"g4",img:"img/dau-truong-sinh-tu.jpg"},
  {n:"Ebenezer",d:"Phim ma Giáng sinh, giả tưởng. Hơi rợn rợn, nhưng có tớ ngồi cạnh cậu rồi 👻",e:"🕯️",g:"g5",img:"img/ebenezer.jpg"}
 ];
-const FORM_KEY="YOUR_WEB3FORMS_ACCESS_KEY"; // dán mã Web3Forms vào đây
+const FORM_KEY="b56226ed-670b-4e71-a7c2-4d72c42315c9"; // dán mã Web3Forms vào đây
 let sent=false;
 const state={food:null,late:null,movie:null};
 const $=id=>document.getElementById(id);
@@ -160,7 +160,7 @@ $('yes').onclick=()=>{state.late=true;show('s3')};
 $('no').onclick=()=>{state.late=false;state.movie=null;buildSummary();show('s4')};
 
 async function sendResult(){
-  if(sent||FORM_KEY.startsWith('YOUR_'))return;
+  if(sent)return;
   sent=true;
   try{
     const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
