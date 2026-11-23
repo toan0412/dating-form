@@ -35,8 +35,20 @@
   .hearts i.on{color:var(--rose)}
   main{flex:1;padding:6px 22px 28px}
 
-  .scene{animation:in .35s ease both}
-  @keyframes in{from{opacity:0}to{opacity:1}}
+  /* chuyển bước: trượt + mờ, cái cũ lướt đi rồi cái mới lướt tới */
+  .in-fwd{animation:inFwd .38s cubic-bezier(.2,.8,.2,1) both}
+  .in-back{animation:inBack .38s cubic-bezier(.2,.8,.2,1) both}
+  .out-fwd{animation:outFwd .18s ease-in both}
+  .out-back{animation:outBack .18s ease-in both}
+  @keyframes inFwd{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+  @keyframes inBack{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+  @keyframes outFwd{to{opacity:0;transform:translateX(-30px)}}
+  @keyframes outBack{to{opacity:0;transform:translateX(30px)}}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .in-fwd .spots>*,.in-back .spots>*,.in-fwd .tk,.in-back .tk,.in-fwd .answer,.in-back .answer{animation:rise .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*80ms + 140ms)}
+  @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+  .hearts i{transition:color .3s}
+  .hearts i.on{animation:pop .45s ease both}
   h1{font-family:var(--script);font-weight:700;color:var(--rose-d);font-size:clamp(2.3rem,10vw,3rem);line-height:1.1;margin-bottom:10px;outline:none}
   .lead{color:var(--muted);max-width:34em;margin-bottom:26px}
 
@@ -199,7 +211,8 @@ function build(list,box,key,cls,inner,wrap){
       b.setAttribute('aria-pressed','true');
       updateCta();
     };
-    if(wrap){const w=document.createElement('div');w.className=wrap;w.appendChild(b);box.appendChild(w)}else box.appendChild(b);
+    const i=box.children.length;
+    if(wrap){const w=document.createElement('div');w.className=wrap;w.style.setProperty('--i',i);w.appendChild(b);box.appendChild(w)}else{b.style.setProperty('--i',i);box.appendChild(b)}
   });
 }
 build(foods,$('spots'),'food','spot',o=>`<span class="polaroid"><span class="photo">${img(o)}</span><span class="cap"><b>${esc(o.n)}</b>${o.d?`<small>${esc(o.d)}</small>`:''}${o.note?`<span class="warn">${esc(o.note)}</span>`:''}</span><span class="sticker" aria-hidden="true">♥</span></span>`);
@@ -209,8 +222,10 @@ build(movies,$('films'),'movie','film',o=>`<span class="poster">${img(o)}</span>
 const stack=['hello'];
 let cur='hello';
 const ctaLabel={hello:'Mở thư',food:'Tiếp tục',movie:'Xong rồi 💌'};
-function show(id){
-  document.querySelectorAll('.scene').forEach(s=>s.hidden=s.id!==id);
+let navBusy=false;
+const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function render(id,dir){
+  document.querySelectorAll('.scene').forEach(sc=>{sc.hidden=sc.id!==id;sc.classList.remove('in-fwd','in-back','out-fwd','out-back')});
   cur=id;
   $('back').hidden=!(id==='food'||id==='late'||id==='movie');
   const step={food:0,late:1,movie:2}[id];
@@ -221,13 +236,23 @@ function show(id){
   if(hasCta)$('ctaBtn').textContent=ctaLabel[id];
   updateCta();
   window.scrollTo(0,0);
-  const h=document.querySelector('#'+id+' h1');if(h)h.focus({preventScroll:true});
+  const sc=$(id);
+  if(!reduceMotion())sc.classList.add('in-'+dir);
+  const h=sc.querySelector('h1');if(h)h.focus({preventScroll:true});
 }
-function go(id){stack.push(id);show(id)}
+function show(id,dir='fwd'){
+  const prev=document.querySelector('.scene:not([hidden])');
+  if(prev&&prev.id!==id&&!reduceMotion()){
+    navBusy=true;
+    prev.classList.add('out-'+dir);
+    setTimeout(()=>{render(id,dir);navBusy=false},180);
+  }else render(id,dir);
+}
+function go(id){if(navBusy)return;stack.push(id);show(id,'fwd')}
 function updateCta(){
   $('ctaBtn').disabled=(cur==='food'&&!state.food)||(cur==='movie'&&!state.movie);
 }
-$('back').onclick=()=>{if(stack.length>1){stack.pop();show(stack[stack.length-1])}};
+$('back').onclick=()=>{if(navBusy)return;if(stack.length>1){stack.pop();show(stack[stack.length-1],'back')}};
 $('ctaBtn').onclick=()=>{
   if(cur==='hello'){
     const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -261,7 +286,7 @@ async function send(){
   busy=false;
 }
 $('retry').onclick=send;
-show('hello');
+render('hello','fwd');
 </script>
 </body>
 </html>
