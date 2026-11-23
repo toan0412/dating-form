@@ -100,7 +100,6 @@
   <section id="s4" class="hidden thanks">
     <div class="script">Cảm ơn cậu nhiều lắm! 💗</div>
     <p class="lead">Cảm ơn cậu đã dành thời gian chọn cùng tớ. Tớ rất mong chờ buổi hẹn hôm đó.</p>
-    <div class="summary hidden" id="summary"></div>
     <div class="center">
       <button class="btn" id="copy">Xong rồi 💌</button>
     </div>
@@ -175,22 +174,11 @@ function buildSummary(){
   let t="Tâm chọn nè 💌\n🍽️ Quán ăn: "+state.food;
   t+="\n🌙 Về muộn: "+(state.late?"Được":"Không, tớ về sớm");
   if(state.late&&state.movie)t+="\n🎬 Phim: "+state.movie;
-  $('summary').textContent=t;
   sendResult();
 }
 $('copy').onclick=async()=>{
   if(!ok)await sendResult();
-  if(ok){$('note').textContent='Tớ nhận được rồi nha, cảm ơn cậu 🥰';return}
-  $('summary').classList.remove('hidden');
-  const text=$('summary').textContent;
-  try{
-    await navigator.clipboard.writeText(text);
-    $('note').textContent='Chưa gửi được rồi 🥲 Tớ đã chép lựa chọn của cậu, cậu dán gửi cho tớ giúp nha 💕';
-  }catch(e){
-    const r=document.createRange();r.selectNodeContents($('summary'));
-    const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
-    $('note').textContent='Chưa gửi được rồi 🥲 Cậu giữ và sao chép đoạn trên gửi cho tớ giúp nha 💕';
-  }
+  $('note').textContent=ok?'Tớ nhận được rồi nha, cảm ơn cậu 🥰':'Chưa gửi được rồi 🥲 Cậu bấm lại giúp tớ nha';
 };
 </script>
 </body>
